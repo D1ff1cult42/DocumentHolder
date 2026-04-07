@@ -21,7 +21,7 @@ import java.util.List;
 public class ActivateAccountServiceImpl implements ActivateAccountService {
     private final UserRepository userRepository;
 
-    @Value("${security.first-delition-warning}")
+    @Value("${security.first-deletion-warning}")
     private Duration firstDeletionWarning;
 
     @Value("${security.second-deletion-warning}")
