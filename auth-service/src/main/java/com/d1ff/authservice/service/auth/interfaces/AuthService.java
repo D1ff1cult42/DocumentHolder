@@ -4,9 +4,10 @@ import com.d1ff.authservice.dto.request.LoginRequest;
 import com.d1ff.authservice.dto.request.RegisterRequest;
 import com.d1ff.authservice.dto.response.AuthResponse;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.BadCredentialsException;
 
 public interface AuthService {
-    void register(String ip, String userAgent, RegisterRequest request, HttpServletResponse response);
+    AuthResponse register(String ip, String userAgent, RegisterRequest request, HttpServletResponse response);
 
     AuthResponse login(String ip, String userAgent, LoginRequest request, HttpServletResponse response);
 

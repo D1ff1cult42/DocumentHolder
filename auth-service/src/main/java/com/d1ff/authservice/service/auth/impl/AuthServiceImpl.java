@@ -39,7 +39,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void register(String ip, String userAgent , RegisterRequest request, HttpServletResponse response) {
+    public AuthResponse register(String ip, String userAgent , RegisterRequest request, HttpServletResponse response) {
         if (userRepository.existsByEmail(request.email())) {
             log.warn("Registration attempt for existing email: {}", request.email());
             throw new UserAlreadyExistsException("User with email " + request.email() + " already exists");
@@ -54,10 +54,16 @@ public class AuthServiceImpl implements AuthService {
         //userRegisteredProducer.sendUserRegistered(user.getId(), user.getEmail(), request.username());
 
         //TODO: email confirmation
+        AccessTokenResponse accessToken = jwtService.createToken(user);
+        refreshTokenService.createRefreshToken(user, response);
+
+        return AuthResponse.builder()
+                .accessToken(accessToken.accessToken())
+                .expiresAt(accessToken.expiresAt())
+                .build();
     }
 
     @Override
-    @Transactional(readOnly = true)
     public AuthResponse login(String ip, String userAgent, LoginRequest request,  HttpServletResponse response) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password()));
@@ -79,7 +85,6 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public AuthResponse refreshToken(String ip, String userAgent, String refreshToken, HttpServletResponse response) {
         String userId = refreshTokenService.findAndRevokeToken(refreshToken);
         User user = userRepository.findById(UUID.fromString(userId))
@@ -103,7 +108,6 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public void logoutAll(String ip, String userAgent, String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadCredentialsException("User not found"));
