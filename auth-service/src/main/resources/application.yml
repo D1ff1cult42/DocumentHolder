@@ -34,3 +34,12 @@ spring:
     locations: classpath:db/migration
     baseline-version: 0
     validate-on-migrate: true
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health
