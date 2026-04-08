@@ -6,7 +6,8 @@ CREATE TABLE users
     verified      BOOLEAN      NOT NULL,
     created_at    TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_at    TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    role          VARCHAR(255),
+    role          VARCHAR(255) NOT NULL DEFAULT 'USER',
+    warning_level VARCHAR(255) NOT NULL DEFAULT 'NONE',
     CONSTRAINT pk_users PRIMARY KEY (id)
 );
 
