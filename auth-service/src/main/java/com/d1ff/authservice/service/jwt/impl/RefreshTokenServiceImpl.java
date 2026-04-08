@@ -33,6 +33,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     private static final RedisScript<Long> CREATE_TOKEN_SCRIPT = RedisScript.of("""
             redis.call('SET', KEYS[1], ARGV[1], 'EX', ARGV[3])
             redis.call('SADD', KEYS[2], ARGV[2])
+            redis.call('EXPIRE', KEYS[2], ARGV[3], 'GT')
             return 1
             """, Long.class);
 
