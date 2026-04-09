@@ -43,7 +43,7 @@ management:
       enabled: true
   metrics:
     tags:
-      application: account-service
+      application: auth-service
       environment: ${ENVIRONMENT:local}
     distribution:
       percentiles-histogram:
@@ -52,9 +52,10 @@ management:
       percentiles:
         http.server.requests: 0.5, 0.95, 0.99
   tracing:
-    enabled: true
     sampling:
       probability: 1.0
+    export:
+      enabled: true
   opentelemetry:
     tracing:
       export:
