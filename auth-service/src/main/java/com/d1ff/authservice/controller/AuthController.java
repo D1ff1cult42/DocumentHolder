@@ -18,11 +18,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,47 +26,27 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "AuthController", description = "Controller for user authentication operations")
 public class AuthController {
     private final AuthService authService;
+
     @Operation(summary = "Register a new user",
             description = "Register a new user with the provided email and password.",
             responses = {
-                    @ApiResponse(
-                            responseCode = "201",
-                            description = "User registered successfully",
-                            content = @io.swagger.v3.oas.annotations.media.Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = AuthResponse.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "409",
-                            description = "User already exists",
-                            content = @io.swagger.v3.oas.annotations.media.Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "Invalid input data",
-                            content = @io.swagger.v3.oas.annotations.media.Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "Internal server error",
-                            content = @io.swagger.v3.oas.annotations.media.Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            )
-                    )
-            }
-    )
+                    @ApiResponse(responseCode = "201", description = "User registered successfully",
+                            content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = AuthResponse.class))),
+                    @ApiResponse(responseCode = "409", description = "User already exists",
+                            content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid input data",
+                            content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
+                            content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class)))
+            })
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody @Valid RegisterRequest registerRequest,
                                                  HttpServletResponse response,
-                                                 HttpServletRequest request){
+                                                 HttpServletRequest request) {
         AnalyticDto dto = IpAndUserAgentResolver.resolve(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(authService.register(dto.ip(), dto.userAgent(), registerRequest, response));
@@ -79,164 +55,83 @@ public class AuthController {
     @Operation(summary = "User login",
             description = "Authenticate a user with email and password.",
             responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "User logged in successfully",
-                            content = @io.swagger.v3.oas.annotations.media.Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = AuthResponse.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "Invalid credentials",
-                            content = @io.swagger.v3.oas.annotations.media.Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "Invalid input data",
-                            content = @io.swagger.v3.oas.annotations.media.Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "Internal server error",
-                            content = @io.swagger.v3.oas.annotations.media.Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            )
-                    )
-            }
-    )
+                    @ApiResponse(responseCode = "200", description = "User logged in successfully",
+                            content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = AuthResponse.class))),
+                    @ApiResponse(responseCode = "401", description = "Invalid credentials",
+                            content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid input data",
+                            content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
+                            content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class)))
+            })
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody @Valid LoginRequest loginRequest,
                                               HttpServletResponse response,
-                                              HttpServletRequest request){
+                                              HttpServletRequest request) {
         AnalyticDto dto = IpAndUserAgentResolver.resolve(request);
-        return ResponseEntity
-                .ok(authService.login(dto.ip(), dto.userAgent(), loginRequest, response));
+        return ResponseEntity.ok(authService.login(dto.ip(), dto.userAgent(), loginRequest, response));
     }
 
     @Operation(summary = "Refresh authentication token",
             description = "Refresh the authentication token using a valid refresh token.",
             responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Token refreshed successfully",
-                            content = @io.swagger.v3.oas.annotations.media.Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = AuthResponse.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "Invalid or expired refresh token",
-                            content = @io.swagger.v3.oas.annotations.media.Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "Internal server error",
-                            content = @io.swagger.v3.oas.annotations.media.Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            )
-                    )
-            }
-    )
-
+                    @ApiResponse(responseCode = "200", description = "Token refreshed successfully",
+                            content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = AuthResponse.class))),
+                    @ApiResponse(responseCode = "401", description = "Invalid or expired refresh token",
+                            content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
+                            content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class)))
+            })
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refreshToken(
-                                                     HttpServletResponse response,
-                                                     HttpServletRequest request){
+    public ResponseEntity<AuthResponse> refreshToken(HttpServletResponse response,
+                                                     HttpServletRequest request) {
         AnalyticDto dto = IpAndUserAgentResolver.resolve(request);
         String refreshToken = RefreshExtractor.extract(request);
-        return ResponseEntity
-                .ok(authService.refreshToken(dto.ip(), dto.userAgent(), refreshToken, response));
+        return ResponseEntity.ok(authService.refreshToken(dto.ip(), dto.userAgent(), refreshToken, response));
     }
 
     @Operation(summary = "Logout user",
             description = "Logout the user by invalidating the provided refresh token.",
             responses = {
-                    @ApiResponse(
-                            responseCode = "204",
-                            description = "User logged out successfully"
-                    ),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "Invalid or expired refresh token",
-                            content = @io.swagger.v3.oas.annotations.media.Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "Invalid Credentials",
-                            content = @io.swagger.v3.oas.annotations.media.Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "Internal server error",
-                            content = @io.swagger.v3.oas.annotations.media.Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            )
-                    )
-            }
-    )
+                    @ApiResponse(responseCode = "204", description = "User logged out successfully"),
+                    @ApiResponse(responseCode = "401", description = "Invalid or expired refresh token",
+                            content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
+                            content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class)))
+            })
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest request){
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
         String refreshToken = RefreshExtractor.extract(request);
         AnalyticDto dto = IpAndUserAgentResolver.resolve(request);
-
         authService.logout(dto.ip(), dto.userAgent(), refreshToken);
         return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Logout all sessions for a user",
-            description = "Logout the user from all sessions by invalidating all refresh tokens associated with the user's email.",
+            description = "Logout the user from all sessions. Requires a valid JWT (X-User-Email header set by gateway).",
             responses = {
-                    @ApiResponse(
-                            responseCode = "204",
-                            description = "All user sessions logged out successfully"
-                    ),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "Invalid Credentials",
-                            content = @io.swagger.v3.oas.annotations.media.Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "500",
-                            description = "Internal server error",
-                            content = @io.swagger.v3.oas.annotations.media.Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            )
-                    )
-            }
-    )
+                    @ApiResponse(responseCode = "204", description = "All user sessions logged out successfully"),
+                    @ApiResponse(responseCode = "401", description = "Missing or invalid authentication",
+                            content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "500", description = "Internal server error",
+                            content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json",
+                                    schema = @Schema(implementation = ErrorResponse.class)))
+            })
     @PostMapping("/logout-all")
-    public ResponseEntity<Void> logoutAll(HttpServletRequest request){
-        String email = SecurityContextHolder.getContext()
-                .getAuthentication().getName();
+    public ResponseEntity<Void> logoutAll(HttpServletRequest request,
+                                          @RequestHeader(value = "X-User-Email", required = false) String email) {
         AnalyticDto dto = IpAndUserAgentResolver.resolve(request);
-
         authService.logoutAll(dto.ip(), dto.userAgent(), email);
-
         return ResponseEntity.noContent().build();
     }
 }

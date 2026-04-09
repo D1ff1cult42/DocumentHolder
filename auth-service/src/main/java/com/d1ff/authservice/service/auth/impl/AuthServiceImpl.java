@@ -109,6 +109,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void logoutAll(String ip, String userAgent, String email) {
+        if(email == null){
+            throw new BadCredentialsException("Unauthorized");
+        }
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadCredentialsException("User not found"));
 
