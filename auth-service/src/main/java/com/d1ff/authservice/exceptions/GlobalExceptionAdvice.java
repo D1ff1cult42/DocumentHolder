@@ -1,5 +1,6 @@
 package com.d1ff.authservice.exceptions;
 
+import com.d1ff.exceptions.UnauthorizedException;
 import com.d1ff.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -75,6 +76,19 @@ public class GlobalExceptionAdvice {
                 .path(request.getRequestURI())
                 .build();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(
+            UnauthorizedException ex, HttpServletRequest request){
+        ErrorResponse error = ErrorResponse.builder()
+                .message(ex.getMessage())
+                .error("Unauthorized")
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .timestamp(new Timestamp(System.currentTimeMillis()))
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
 
     @ExceptionHandler(BindException.class)

@@ -12,6 +12,7 @@ import com.d1ff.authservice.service.auth.interfaces.AuthService;
 import com.d1ff.authservice.service.jwt.interfaces.JwtService;
 import com.d1ff.authservice.security.UserPrincipal;
 import com.d1ff.authservice.service.jwt.interfaces.RefreshTokenService;
+import com.d1ff.utils.UnauthorizedHandler;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -109,9 +110,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void logoutAll(String ip, String userAgent, String email) {
-        if(email == null){
-            throw new BadCredentialsException("Unauthorized");
-        }
+        UnauthorizedHandler.handleXHeader(email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadCredentialsException("User not found"));
 
