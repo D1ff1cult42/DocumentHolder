@@ -69,6 +69,7 @@ services:
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REFRESH_LOCAL: ${REFRESH_LOCAL}
     ports:
       - "8081:8081"
     networks:

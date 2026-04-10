@@ -1,11 +1,11 @@
 server:
   port: 8081
-
 jwt:
   private-key: ${PRIVATE_KEY}
   access-token-expiration: ${ACCESS_TOKEN_EXPIRATION}
   issuer: ${ISSUER}
   refresh-token-expiration: ${REFRESH_TOKEN_EXPIRATION}
+  refresh-local: ${REFRESH_LOCAL}
   key-ID: ${KEY_ID}
 security:
   first-deletion-warning: ${FIRST_DELETION_WARNING}

@@ -25,6 +25,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Value("${jwt.refresh-token-expiration}")
     private Duration refreshTokenExpiration;
 
+    @Value("${jwt.refresh-local}")
+    private boolean isLocal;
+
     private final RedisTemplate<String, String> redisTemplate;
 
     private static final String TOKEN_PREFIX = "refresh-token:";
@@ -71,7 +74,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
         ResponseCookie cookie = ResponseCookie.from("refreshToken", token)
                 .httpOnly(true)
-                .secure(true)
+                .secure(!isLocal)
                 .sameSite("Strict")
                 .path("/api/auth")
                 .maxAge(refreshTokenExpiration)
