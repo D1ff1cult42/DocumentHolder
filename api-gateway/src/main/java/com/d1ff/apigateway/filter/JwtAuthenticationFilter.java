@@ -5,34 +5,32 @@ import com.d1ff.apigateway.exceptions.TokenValidationException;
 import com.d1ff.apigateway.service.interfaces.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.gateway.filter.GatewayFilterChain;
-import org.springframework.cloud.gateway.filter.GlobalFilter;
-import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.List;
 import java.util.Map;
 
 @Component
+@Order(-1)
 @RequiredArgsConstructor
 @Slf4j
-public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
+public class JwtAuthenticationFilter implements WebFilter {
 
     private final JwtService jwtService;
     private final ObjectMapper objectMapper;
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         ServerWebExchange stripped = exchange.mutate()
                 .request(r -> r.headers(h -> {
                     h.remove("X-User-Id");
@@ -61,34 +59,24 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String email  = (String) claims.get("sub");
         String role   = (String) claims.get("role");
 
-        var authentication = new UsernamePasswordAuthenticationToken(
-                email, null, List.of(new SimpleGrantedAuthority(role))
-        );
-
-        ServerWebExchange mutated = stripped.mutate()
-                .request(r -> r
-                        .header("X-User-Id", userId)
-                        .header("X-User-Email", email)
-                        .header("X-User-Role", role))
+        ServerHttpRequest mutatedRequest = stripped.getRequest().mutate()
+                .header("X-User-Id", userId != null ? userId : "")
+                .header("X-User-Email", email != null ? email : "")
+                .header("X-User-Role", role != null ? role : "")
                 .build();
 
-        return chain.filter(mutated)
-                .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
+        log.debug("JWT validated successfully for user: {} (ID: {})", email, userId);
+
+        return chain.filter(stripped.mutate().request(mutatedRequest).build());
     }
 
     private Mono<Void> writeError(ServerWebExchange exchange, HttpStatus status, String message) {
         var response = exchange.getResponse();
         response.setStatusCode(status);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-
         WebFluxErrorResponse body = WebFluxErrorResponse.of(status, message, exchange.getRequest().getPath().value());
         byte[] bytes = objectMapper.writeValueAsBytes(body);
         DataBuffer buffer = response.bufferFactory().wrap(bytes);
         return response.writeWith(Mono.just(buffer));
-    }
-
-    @Override
-    public int getOrder() {
-        return Ordered.HIGHEST_PRECEDENCE;
     }
 }

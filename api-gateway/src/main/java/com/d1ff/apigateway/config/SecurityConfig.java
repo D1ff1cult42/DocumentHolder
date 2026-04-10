@@ -25,7 +25,7 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_PATHS = {
             "/actuator/**",
-            "/api/auth/register", "/api/auth/login", "/api/auth/refresh", "/api/auth/logout",
+            "/api/auth/register", "/api/auth/login", "/api/auth/refresh", "/api/auth/logout", "/api/auth/logout-all",
             "/api/mail/**",
             "/swagger/**", "/swagger-ui/**", "/swagger-ui.html",
             "/v3/api-docs/**", "/webjars/**", "/docs/**",
@@ -41,7 +41,7 @@ public class SecurityConfig {
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(PUBLIC_PATHS).permitAll()
-                        .anyExchange().authenticated()
+                        //.anyExchange().authenticated()
                 )
                 .exceptionHandling(e -> e
                         .authenticationEntryPoint((exchange, ex) ->
