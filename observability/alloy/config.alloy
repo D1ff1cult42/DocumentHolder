@@ -28,7 +28,7 @@ loki.process "parse_json" {
     forward_to = [loki.write.loki.receiver]
 
     stage.match {
-        selector = `{compose_service=~"auth-service"}`
+        selector = `{compose_service=~"auth-service|api-gateway"}`
         stage.json {
             expressions = {
                 level    = "level",
