@@ -49,3 +49,9 @@ resilience4j:
     instances:
       authCircuitBreaker:
         timeoutDuration: 3s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus, info, metrics
